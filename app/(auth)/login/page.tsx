@@ -3,10 +3,15 @@
 import { useSearchParams } from "next/navigation";
 import FormLogin from "@/components/auth/form-login";
 import { GithubButton, GoogleButton } from "@/components/social-button";
+import { Suspense, useEffect, useState } from "react";
 
-const Login = () => {
+const LoginContent = () => {
   const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(searchParams.get("error"));
+  }, [searchParams]);
 
   return (
     <div className="p-6 space-y-4">
@@ -30,6 +35,14 @@ const Login = () => {
       <GoogleButton />
       <GithubButton />
     </div>
+  );
+};
+
+const Login = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 };
 
