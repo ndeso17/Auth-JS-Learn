@@ -4,12 +4,11 @@ import { prisma } from "@/lib/prisma";
 import Credentials from "next-auth/providers/credentials";
 import { SignInSchema } from "@/lib/zod";
 import { compareSync } from "bcrypt-ts";
-import { Adapter } from "next-auth/adapters"; // 🔥 Pastikan tipe sesuai dengan NextAuth
+import { Adapter } from "next-auth/adapters";
 import { NextResponse } from "next/server";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 
-// 🔹 Definisikan tipe User yang memiliki role
 interface CustomUser {
   id: string;
   email: string;
@@ -17,7 +16,7 @@ interface CustomUser {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma) as Adapter, // ✅ Pastikan tipe cocok
+  adapter: PrismaAdapter(prisma) as Adapter, 
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -47,7 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const passwordMatch = compareSync(password, user.password);
         if (!passwordMatch) return null;
 
-        return user as CustomUser; // ✅ Pastikan user memiliki tipe yang sesuai
+        return user as CustomUser;
       },
     }),
   ],
@@ -58,12 +57,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const publicRoutes = ["/login", "/register"];
 
       if (!isLoggedIn && protectedRoutes.includes(nextUrl.pathname)) {
-        // return Response.redirect(new URL("/login", nextUrl));
         return NextResponse.redirect(new URL("/login", nextUrl));
       }
 
       if (isLoggedIn && publicRoutes.includes(nextUrl.pathname)) {
-        // return Response.redirect(new URL("/dashboard", nextUrl));
         return NextResponse.redirect(new URL("/dashboard", nextUrl));
       }
 
@@ -71,16 +68,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     jwt({ token, user }) {
       if (user) {
-        const customUser = user as CustomUser & { gender?: string }; // ⬅️ Tambahkan gender
+        const customUser = user as CustomUser & { gender?: string }; 
         token.role = customUser.role;
-        token.gender = customUser.gender; // ⬅️ Simpan gender di token
+        token.gender = customUser.gender; 
       }
       return token;
     },
     session({ session, token }) {
       session.user.id = token.sub!;
       session.user.role = token.role as string;
-      session.user.gender = token.gender as string; // ⬅️ Tambahkan gender ke session
+      session.user.gender = token.gender as string; 
       return session;
     },
   },
